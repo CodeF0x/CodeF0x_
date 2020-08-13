@@ -152,6 +152,7 @@ async function getSpotifyData() {
 
 async function updateGist(data) {
   let gist;
+  let content;
 
   try {
     gist = await octokit.gists.get({ gist_id: gistId });
@@ -160,7 +161,7 @@ async function updateGist(data) {
     throw error;
   }
 
-  const content = `
+  content = `
   Currently, I can't get enough of the song <a href="${data.recentSongData.songLink}">${data.recentSongData.songName}</a> by <a href="${data.recentSongData.artistLink}">${data.recentSongData.artistName}</a> on Spotify.
 
   My most listened genre is <a href="https://duckduckgo.com/?q=${data.mostListenedGenre.genreName + 'music'}>${data.mostListenedGenre.genreName}</a>.
@@ -174,7 +175,7 @@ async function updateGist(data) {
       files: {
         [filename]: {
           filename: `spotify-activity.md`,
-          content: content,
+          content: content
         },
       },
     });
