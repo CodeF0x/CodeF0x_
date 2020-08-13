@@ -129,7 +129,7 @@ async function getSpotifyData() {
   };
 
   // most listened genre short term
-  data = await fetch(`${API_BASE}/me/artists/?time_range=short_term&limit=1`, {
+  data = await fetch(`${API_BASE}/me/top/artists/?time_range=short_term&limit=1`, {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
