@@ -1,4 +1,4 @@
-undefined
+0cf788dfee0447b69d316483e8615eb9
 Error: ENOENT: no such file or directory, open 'spotify-auth.json'
     at Object.openSync (fs.js:465:3)
     at Object.readFileSync (fs.js:368:35)
