@@ -164,8 +164,8 @@ async function updateGist(data) {
   content = `
   Currently, I can't get enough of the song <a href="${data.recentSongData.songLink}">${data.recentSongData.songName}</a> by <a href="${data.recentSongData.artistLink}">${data.recentSongData.artistName}</a> on Spotify.
 
-  My most listened genre is <a href="https://duckduckgo.com/?q=${data.mostListenedGenre.genreName + 'music'}>${data.mostListenedGenre.genreName}</a>.
-  Still, I've been listening to a lot of <a href="https://duckduckgo.com/?q=${data.shortTermGenre.genreName + 'music'}>${data.shortTermGenre.genreName}</a> lately.
+  My most listened genre is <a href="https://duckduckgo.com/?q=${data.mostListenedGenre.genreName + ' music'}">${data.mostListenedGenre.genreName}</a>.
+  Still, I've been listening to a lot of <a href="https://duckduckgo.com/?q=${data.shortTermGenre.genreName + ' music'}">${data.shortTermGenre.genreName}</a> lately.
   `;
 
   try {
