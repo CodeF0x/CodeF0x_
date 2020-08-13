@@ -7,6 +7,8 @@ const {
   SPOTIFY_CODE: spotifyCode,
 } = process.env;
 
+console.log(SPOTIFY_CLIENT_ID);
+
 const API_BASE = "https://api.spotify.com/v1";
 const AUTH_CACHE_FILE = "spotify-auth.json";
 
@@ -96,7 +98,6 @@ async function getSpotifyData() {
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
-  console.log(data);
   const recentSongData = {
     artistName: data.items[0].album.artists[0].name,
     artistLink: data.items[0].album.artists[0].external_urls.spotify,
