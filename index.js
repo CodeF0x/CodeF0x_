@@ -7,8 +7,6 @@ const {
   SPOTIFY_CODE: spotifyCode,
 } = process.env;
 
-console.log(spotifyClientId);
-
 const API_BASE = "https://api.spotify.com/v1";
 const AUTH_CACHE_FILE = "spotify-auth.json";
 
