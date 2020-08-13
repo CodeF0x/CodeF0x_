@@ -96,6 +96,7 @@ async function getSpotifyData() {
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
+  console.log(data);
   const recentSongData = {
     artistName: data.items[0].album.artists[0].name,
     artistLink: data.items[0].album.artists[0].external_urls.spotify,
