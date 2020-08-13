@@ -148,7 +148,7 @@ async function updateGist(data) {
       gist_id: gistId,
       files: {
         [filename]: {
-          filename: `🎼 Kan's Spotify Activity`,
+          filename: `activity.md`,
           content: lines
         }
       }
