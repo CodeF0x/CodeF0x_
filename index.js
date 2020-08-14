@@ -82,6 +82,9 @@ const encodeFormData = (data) => {
  */
 async function getSpotifyData() {
   const token = await getSpotifyToken();
+
+  let genres;
+
   // recently most listend song
   let data = await fetch(
     `${API_BASE}/me/top/tracks?time_range=short_term&limit=1`,
@@ -105,7 +108,7 @@ async function getSpotifyData() {
 
   // most listened genre long term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=long_term&limit=1`,
+    `${API_BASE}/me/top/artists/?time_range=long_term&limit=20`,
     {
       headers: {
         Accept: "application/json",
@@ -117,13 +120,15 @@ async function getSpotifyData() {
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
+  genres = collectGenres(data);
+
   const mostListenedGenre = {
-    genreName: data.items[0].genres[0],
+    genreName: mode(genres),
   };
 
   // most listened genre short term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=short_term&limit=1`,
+    `${API_BASE}/me/top/artists/?time_range=short_term&limit=20`,
     {
       headers: {
         Accept: "application/json",
@@ -135,8 +140,10 @@ async function getSpotifyData() {
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
+  genres = collectGenres(data);
+
   const shortTermGenre = {
-    genreName: data.items[0].genres[0],
+    genreName: mode(genres),
   };
 
   return {
@@ -165,6 +172,29 @@ async function updateGist(data) {
   `;
 
   fs.writeFileSync('readme.md', content);
+}
+
+/**
+ * @param {Array<String>} arr
+ * Returns genre with most occurrence
+ */
+function mode(arr){
+  return arr.sort((a,b) =>
+        arr.filter(v => v === a).length
+      - arr.filter(v => v === b).length
+  ).pop();
+}
+
+/**
+ * Put all genres of each artist in an array
+ * @param {JSON} data
+ */
+function collectGenres(data) {
+  const genres = [];
+  data.items.forEach(artist => {
+    genres = [...genres, ...artist.genres];
+  });
+  return genres;
 }
 
 (async () => {
