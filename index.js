@@ -190,7 +190,7 @@ function mode(arr){
  * @param {JSON} data
  */
 function collectGenres(data) {
-  const genres = [];
+  let genres = [];
   data.items.forEach(artist => {
     genres = [...genres, ...artist.genres];
   });
