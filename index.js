@@ -162,7 +162,7 @@ async function updateGist(data) {
   }">${data.shortTermGenre.genreName}</a> lately.
   `;
 
-  console.log(content);
+  fs.writeFileSync('readme.md', content);
 }
 
 (async () => {
