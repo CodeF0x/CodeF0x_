@@ -1,0 +1,62 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:13
+
+commands:
+  install:
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dependency-cache-{{ checksum "package.json" }}
+            - dependency-cache-
+      - run: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+
+jobs:
+  spotifybox:
+    <<: *defaults
+    steps:
+      - install
+      - restore_cache:
+          keys:
+            - spotify-auth-{{ .Environment.CIRCLE_PREVIOUS_BUILD_NUM }}
+            - spotify-auth-
+      - run: git pull
+      - run: git config user.name "CircleCI"
+      - run: git config user.email "circlecli@exmaple.com"
+      - run: git rm readme.md
+      - run: git commit -m "Delete"
+      - run: npm start
+      - save_cache:
+          key: spotify-auth-{{ .Environment.CIRCLE_BUILD_NUM }}
+          paths:
+            - spotify-auth.json
+      - run: git add readme.md
+      - run: git commit -m "Updated file"
+      - run: git push -q https://${GITHUB_TOKEN}@github.com/CodeF0x/spotify-stats.git
+
+workflows:
+  version: 2
+
+  test:
+    jobs:
+      - spotifybox
+
+  poll:
+    triggers:
+      - schedule:
+          # Run once every hour
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - spotifybox
