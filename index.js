@@ -192,9 +192,9 @@ function mode(arr){
 function collectGenres(data) {
   let genres = [];
   data.items.forEach(artist => {
+    console.log(artist.name);
     genres = [...genres, ...artist.genres];
   });
-  console.log(genres);
   return genres;
 }
 
