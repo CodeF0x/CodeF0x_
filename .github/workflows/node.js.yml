@@ -5,7 +5,8 @@ name: Spotify Activity
 
 on:
   push:
-    branches: [master]
+    branches-ignore:
+      - "**"
   pull_request:
     branches: [master]
 
