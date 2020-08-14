@@ -152,7 +152,7 @@ async function updateGist(data) {
     data.recentSongData.songLink
   }">${data.recentSongData.songName}</a> by <a href="${
     data.recentSongData.artistLink
-  }">${data.recentSongData.artistName}</a> on Spotify.
+  }">${data.recentSongData.artistName}</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
 
   My most listened genre is <a href="https://duckduckgo.com/?q=${
     data.mostListenedGenre.genreName + " music"
@@ -160,6 +160,8 @@ async function updateGist(data) {
   Still, I've been listening to a lot of <a href="https://duckduckgo.com/?q=${
     data.shortTermGenre.genreName + " music"
   }">${data.shortTermGenre.genreName}</a> lately.
+
+  This file is generated automatically. Read more <a href="https://github.com/CodeF0x/CodeF0x/blob/master/IMPORTANT.md">here</a>.
   `;
 
   fs.writeFileSync('readme.md', content);
