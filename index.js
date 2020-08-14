@@ -108,7 +108,7 @@ async function getSpotifyData() {
 
   // most listened genre long term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=long_term&limit=20`,
+    `${API_BASE}/me/top/artists/?time_range=long_term&limit=30`,
     {
       headers: {
         Accept: "application/json",
@@ -128,7 +128,7 @@ async function getSpotifyData() {
 
   // most listened genre short term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=short_term&limit=20`,
+    `${API_BASE}/me/top/artists/?time_range=short_term&limit=30`,
     {
       headers: {
         Accept: "application/json",
@@ -192,7 +192,6 @@ function mode(arr){
 function collectGenres(data) {
   let genres = [];
   data.items.forEach(artist => {
-    console.log(artist.name);
     genres = [...genres, ...artist.genres];
   });
   return genres;
