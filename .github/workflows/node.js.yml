@@ -31,6 +31,11 @@ jobs:
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CODE: ${{ secrets.SPOTIFY_CODE }}
+      - name: Cache
+        uses: actions/cache@v2.1.0
+        with:
+          path: spotify-auth.json
+          key: ${{ runner.os }}-auth
       - run: git add readme.md
       - run: git config user.name "GitHub Actions"
       - run: git config uer.email "actions@example.com"
