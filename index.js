@@ -194,6 +194,7 @@ function collectGenres(data) {
   data.items.forEach(artist => {
     genres = [...genres, ...artist.genres];
   });
+  console.log(genres);
   return genres;
 }
 
