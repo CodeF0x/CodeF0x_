@@ -40,7 +40,7 @@ jobs:
             - spotify-auth.json
       - run: git add readme.md
       - run: git commit -m "Updated file"
-      - run: git push
+      - run: git push -q https://${GITHUB_TOKEN}@github.com/CodeF0x/spotify-stats.git
 
 workflows:
   version: 2
