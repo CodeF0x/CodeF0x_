@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
-const fs = require('fs');
+const fetch = require("node-fetch");
+const fs = require("fs");
 
 const {
   SPOTIFY_CLIENT_SECRET: spotifyClientSecret,
@@ -7,10 +7,12 @@ const {
   SPOTIFY_CODE: spotifyCode,
 } = process.env;
 
-const API_BASE = 'https://api.spotify.com/v1';
-const AUTH_CACHE_FILE = 'spotify-auth.json';
+const API_BASE = "https://api.spotify.com/v1";
+const AUTH_CACHE_FILE = "spotify-auth.json";
+let token;
 
 async function main() {
+  token = await getSpotifyToken();
   const spotifyData = await getSpotifyData();
   await updateGist(spotifyData);
 }
@@ -22,9 +24,9 @@ async function getSpotifyToken() {
   // default env vars go in here (temp cache)
   let cache = {};
   let formData = {
-    grant_type: 'authorization_code',
+    grant_type: "authorization_code",
     code: spotifyCode,
-    redirect_uri: 'http://localhost/',
+    redirect_uri: "http://localhost/",
   };
 
   // try to read cache from disk if already exists
@@ -40,21 +42,21 @@ async function getSpotifyToken() {
 
   if (cache.spotifyRefreshToken) {
     formData = {
-      grant_type: 'refresh_token',
+      grant_type: "refresh_token",
       refresh_token: cache.spotifyRefreshToken,
     };
   }
 
   // get new tokens
-  const data = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'post',
+  const data = await fetch("https://accounts.spotify.com/api/token", {
+    method: "post",
     body: encodeFormData(formData),
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
       Authorization:
-        'Basic ' +
-        new Buffer.from(spotifyClientId + ':' + spotifyClientSecret).toString(
-          'base64'
+        "Basic " +
+        new Buffer.from(spotifyClientId + ":" + spotifyClientSecret).toString(
+          "base64"
         ),
     },
   })
@@ -73,16 +75,14 @@ async function getSpotifyToken() {
 
 const encodeFormData = (data) => {
   return Object.keys(data)
-    .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-    .join('&');
+    .map((key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+    .join("&");
 };
 
 /**
  * Fetches your data from the spotify API
  */
 async function getSpotifyData() {
-  const token = await getSpotifyToken();
-
   let genres;
 
   // recently most listend song
@@ -90,9 +90,9 @@ async function getSpotifyData() {
     `${API_BASE}/me/top/tracks?time_range=short_term&limit=1`,
     {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }
   )
@@ -108,39 +108,36 @@ async function getSpotifyData() {
 
   // most listened genre long term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=long_term&limit=30`,
+    `${API_BASE}/me/top/tracks/?time_range=long_term&limit=50`,
     {
       headers: {
-        Accept: 'application/json',
+        Accept: "application/json",
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     }
   )
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
-  genres = collectGenres(data);
+  genres = await collectGenres(data);
 
   const mostListenedGenre = {
     genreName: mode(genres),
   };
 
   // most listened genre short term
-  data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=short_term&limit=30`,
-    {
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  )
+  data = await fetch(`${API_BASE}/me/player/recently-played?limit=50`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
-  genres = collectGenres(data);
+  genres = await collectGenres(data);
 
   const shortTermGenre = {
     genreName: mode(genres),
@@ -164,16 +161,21 @@ async function updateGist(data) {
   }</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
 
   My most listened genre is <a href="https://duckduckgo.com/?q=${
-    data.mostListenedGenre.genreName + ' music'
+    data.mostListenedGenre.genreName + " music"
   }">${data.mostListenedGenre.genreName}</a>.
   Still, I've been listening to a lot of <a href="https://duckduckgo.com/?q=${
-    data.shortTermGenre.genreName + ' music'
+    data.shortTermGenre.genreName + " music"
   }">${data.shortTermGenre.genreName}</a> lately.
 
   This file is generated automatically. Read more <a href="https://github.com/CodeF0x/CodeF0x/blob/master/IMPORTANT.md">here</a>.
+  <br>
+  <sub>Last modified at ${new Date()
+    .toISOString()
+    .replace(/T/, " ")
+    .replace(/\..+/, "")}.</sub>
   `;
 
-  fs.writeFileSync('readme.md', content);
+  fs.writeFileSync("readme.md", content);
 }
 
 /**
@@ -193,12 +195,42 @@ function mode(arr) {
  * Put all genres of each artist in an array
  * @param {JSON} data
  */
-function collectGenres(data) {
+async function collectGenres(data) {
   let genres = [];
-  data.items.forEach((artist) => {
-    genres = [...genres, ...artist.genres];
-  });
+  for (const item of data.items) {
+    /**
+     * "data" is different for each call, because the api returns slightly different results.
+     * check is needed because the nesting to get the id is a little different.
+     */
+    const id =
+      item.album === undefined
+        ? item.track.album.artists[0].id
+        : item.album.artists[0].id;
+    const artistGenres = await getGenresFromArtist(id);
+    genres = [...genres, ...artistGenres];
+  }
   return genres;
+}
+
+/**
+ * Gets all genres from an artist by their artist id.
+ * @param {String} id
+ */
+async function getGenresFromArtist(id) {
+  const data = await fetch(`${API_BASE}/artists/${id}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+    .then((data) => data.json())
+    .catch((error) => console.error(error));
+
+  if (!data.genres) {
+    return [];
+  }
+  return data.genres;
 }
 
 (async () => {
