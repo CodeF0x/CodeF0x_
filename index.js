@@ -1,5 +1,5 @@
-const fetch = require("node-fetch");
-const fs = require("fs");
+const fetch = require('node-fetch');
+const fs = require('fs');
 
 const {
   SPOTIFY_CLIENT_SECRET: spotifyClientSecret,
@@ -7,8 +7,8 @@ const {
   SPOTIFY_CODE: spotifyCode,
 } = process.env;
 
-const API_BASE = "https://api.spotify.com/v1";
-const AUTH_CACHE_FILE = "spotify-auth.json";
+const API_BASE = 'https://api.spotify.com/v1';
+const AUTH_CACHE_FILE = 'spotify-auth.json';
 
 async function main() {
   const spotifyData = await getSpotifyData();
@@ -22,9 +22,9 @@ async function getSpotifyToken() {
   // default env vars go in here (temp cache)
   let cache = {};
   let formData = {
-    grant_type: "authorization_code",
+    grant_type: 'authorization_code',
     code: spotifyCode,
-    redirect_uri: "http://localhost/",
+    redirect_uri: 'http://localhost/',
   };
 
   // try to read cache from disk if already exists
@@ -40,21 +40,21 @@ async function getSpotifyToken() {
 
   if (cache.spotifyRefreshToken) {
     formData = {
-      grant_type: "refresh_token",
+      grant_type: 'refresh_token',
       refresh_token: cache.spotifyRefreshToken,
     };
   }
 
   // get new tokens
-  const data = await fetch("https://accounts.spotify.com/api/token", {
-    method: "post",
+  const data = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'post',
     body: encodeFormData(formData),
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+      'Content-Type': 'application/x-www-form-urlencoded',
       Authorization:
-        "Basic " +
-        new Buffer.from(spotifyClientId + ":" + spotifyClientSecret).toString(
-          "base64"
+        'Basic ' +
+        new Buffer.from(spotifyClientId + ':' + spotifyClientSecret).toString(
+          'base64'
         ),
     },
   })
@@ -73,8 +73,8 @@ async function getSpotifyToken() {
 
 const encodeFormData = (data) => {
   return Object.keys(data)
-    .map((key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-    .join("&");
+    .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+    .join('&');
 };
 
 /**
@@ -90,9 +90,9 @@ async function getSpotifyData() {
     `${API_BASE}/me/top/tracks?time_range=short_term&limit=1`,
     {
       headers: {
-        Accept: "application/json",
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     }
   )
@@ -111,9 +111,9 @@ async function getSpotifyData() {
     `${API_BASE}/me/top/artists/?time_range=long_term&limit=30`,
     {
       headers: {
-        Accept: "application/json",
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     }
   )
@@ -131,9 +131,9 @@ async function getSpotifyData() {
     `${API_BASE}/me/top/artists/?time_range=short_term&limit=30`,
     {
       headers: {
-        Accept: "application/json",
+        Accept: 'application/json',
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     }
   )
@@ -159,13 +159,15 @@ async function updateGist(data) {
     data.recentSongData.songLink
   }">${data.recentSongData.songName}</a> by <a href="${
     data.recentSongData.artistLink
-  }">${data.recentSongData.artistName}</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
+  }">${
+    data.recentSongData.artistName
+  }</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
 
   My most listened genre is <a href="https://duckduckgo.com/?q=${
-    data.mostListenedGenre.genreName + " music"
+    data.mostListenedGenre.genreName + ' music'
   }">${data.mostListenedGenre.genreName}</a>.
   Still, I've been listening to a lot of <a href="https://duckduckgo.com/?q=${
-    data.shortTermGenre.genreName + " music"
+    data.shortTermGenre.genreName + ' music'
   }">${data.shortTermGenre.genreName}</a> lately.
 
   This file is generated automatically. Read more <a href="https://github.com/CodeF0x/CodeF0x/blob/master/IMPORTANT.md">here</a>.
@@ -178,11 +180,13 @@ async function updateGist(data) {
  * @param {Array<String>} arr
  * Returns genre with most occurrence
  */
-function mode(arr){
-  return arr.sort((a,b) =>
-        arr.filter(v => v === a).length
-      - arr.filter(v => v === b).length
-  ).pop();
+function mode(arr) {
+  return arr
+    .sort(
+      (a, b) =>
+        arr.filter((v) => v === a).length - arr.filter((v) => v === b).length
+    )
+    .pop();
 }
 
 /**
@@ -191,7 +195,7 @@ function mode(arr){
  */
 function collectGenres(data) {
   let genres = [];
-  data.items.forEach(artist => {
+  data.items.forEach((artist) => {
     genres = [...genres, ...artist.genres];
   });
   return genres;
