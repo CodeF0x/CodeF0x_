@@ -9,8 +9,10 @@ const {
 
 const API_BASE = "https://api.spotify.com/v1";
 const AUTH_CACHE_FILE = "spotify-auth.json";
+let token;
 
 async function main() {
+  token = await getSpotifyToken();
   const spotifyData = await getSpotifyData();
   await updateGist(spotifyData);
 }
@@ -81,8 +83,6 @@ const encodeFormData = (data) => {
  * Fetches your data from the spotify API
  */
 async function getSpotifyData() {
-  const token = await getSpotifyToken();
-
   let genres;
 
   // recently most listend song
@@ -108,7 +108,7 @@ async function getSpotifyData() {
 
   // most listened genre long term
   data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=long_term&limit=30`,
+    `${API_BASE}/me/top/tracks/?time_range=long_term&limit=50`,
     {
       headers: {
         Accept: "application/json",
@@ -120,27 +120,24 @@ async function getSpotifyData() {
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
-  genres = collectGenres(data);
+  genres = await collectGenres(data);
 
   const mostListenedGenre = {
     genreName: mode(genres),
   };
 
   // most listened genre short term
-  data = await fetch(
-    `${API_BASE}/me/top/artists/?time_range=short_term&limit=30`,
-    {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  )
+  data = await fetch(`${API_BASE}/me/player/recently-played?limit=50`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
     .then((data) => data.json())
     .catch((error) => console.error(error));
 
-  genres = collectGenres(data);
+  genres = await collectGenres(data);
 
   const shortTermGenre = {
     genreName: mode(genres),
@@ -159,7 +156,9 @@ async function updateGist(data) {
     data.recentSongData.songLink
   }">${data.recentSongData.songName}</a> by <a href="${
     data.recentSongData.artistLink
-  }">${data.recentSongData.artistName}</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
+  }">${
+    data.recentSongData.artistName
+  }</a> on <a href="https://open.spotify.com/user/9qz2xtkur2fengfsdcq8dd907?si=kq2SVrUkSNe0z1NJjpt7kg">Spotify</a>.
 
   My most listened genre is <a href="https://duckduckgo.com/?q=${
     data.mostListenedGenre.genreName + " music"
@@ -169,32 +168,69 @@ async function updateGist(data) {
   }">${data.shortTermGenre.genreName}</a> lately.
 
   This file is generated automatically. Read more <a href="https://github.com/CodeF0x/CodeF0x/blob/master/IMPORTANT.md">here</a>.
+  <br>
+  <sub>Last modified at ${new Date()
+    .toISOString()
+    .replace(/T/, " ")
+    .replace(/\..+/, "")}.</sub>
   `;
 
-  fs.writeFileSync('readme.md', content);
+  fs.writeFileSync("readme.md", content);
 }
 
 /**
  * @param {Array<String>} arr
  * Returns genre with most occurrence
  */
-function mode(arr){
-  return arr.sort((a,b) =>
-        arr.filter(v => v === a).length
-      - arr.filter(v => v === b).length
-  ).pop();
+function mode(arr) {
+  return arr
+    .sort(
+      (a, b) =>
+        arr.filter((v) => v === a).length - arr.filter((v) => v === b).length
+    )
+    .pop();
 }
 
 /**
  * Put all genres of each artist in an array
  * @param {JSON} data
  */
-function collectGenres(data) {
+async function collectGenres(data) {
   let genres = [];
-  data.items.forEach(artist => {
-    genres = [...genres, ...artist.genres];
-  });
+  for (const item of data.items) {
+    /**
+     * "data" is different for each call, because the api returns slightly different results.
+     * check is needed because the nesting to get the id is a little different.
+     */
+    const id =
+      item.album === undefined
+        ? item.track.album.artists[0].id
+        : item.album.artists[0].id;
+    const artistGenres = await getGenresFromArtist(id);
+    genres = [...genres, ...artistGenres];
+  }
   return genres;
+}
+
+/**
+ * Gets all genres from an artist by their artist id.
+ * @param {String} id
+ */
+async function getGenresFromArtist(id) {
+  const data = await fetch(`${API_BASE}/artists/${id}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+    .then((data) => data.json())
+    .catch((error) => console.error(error));
+
+  if (!data.genres) {
+    return [];
+  }
+  return data.genres;
 }
 
 (async () => {
