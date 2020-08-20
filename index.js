@@ -123,7 +123,7 @@ async function getSpotifyData() {
   genres = await collectGenres(data);
 
   const mostListenedGenre = {
-    genreName: mode(genres),
+    genreName: mode(genres).pop(),
   };
 
   // most listened genre short term
@@ -140,7 +140,7 @@ async function getSpotifyData() {
   genres = await collectGenres(data);
 
   const shortTermGenre = {
-    genreName: mode(genres),
+    genreName: mode(genres).pop(),
   };
 
   return {
@@ -180,7 +180,8 @@ async function updateGist(data) {
 
 /**
  * @param {Array<String>} arr
- * Returns genre with most occurrence
+ * Returns unique array of most listened genres.
+ * Sorted in ascending order.
  */
 function mode(arr) {
   return arr
@@ -188,7 +189,7 @@ function mode(arr) {
       (a, b) =>
         arr.filter((v) => v === a).length - arr.filter((v) => v === b).length
     )
-    .pop();
+    .filter((elem, i, self) => self.indexOf(elem) === i);
 }
 
 /**
