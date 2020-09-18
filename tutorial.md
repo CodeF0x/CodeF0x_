@@ -15,6 +15,7 @@ This tutorial shows you how to setup this repository for yourself.
 > Note: if you used a different `redirect_uri`, the localhost part is replaced with the url you submitted
 
 6. <a href="https://github.com/settings/tokens">Create a GitHub access token</a> with the `public_repo` scope and **save** it for later, as you can only view it after creation
+7. Edit <a href="https://github.com/CodeF0x/CodeF0x/blob/d1b8b7e01406dfcc68f3d899ec178ec6eabd51ef/index.js#L161">this line in index.js</a> to fit your own Spotify account
 
 ## Projekt setup
 
