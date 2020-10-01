@@ -7,5 +7,6 @@
 
   This file is generated automatically. Read more <a href="https://github.com/CodeF0x/CodeF0x/blob/master/IMPORTANT.md">here</a>.
   <br>
+  share this repo as much as possible & support
   <sub>Last modified at 2020-10-01 06:01:20.</sub>
   
