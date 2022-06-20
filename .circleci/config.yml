@@ -49,14 +49,14 @@ workflows:
     jobs:
       - spotifybox
 
-  poll:
-    triggers:
-      - schedule:
+  # poll:
+  #  triggers:
+  #    - schedule:
           # Run once every hour
-          cron: "0 * * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - spotifybox
+  #        cron: "0 * * * *"
+  #        filters:
+  #          branches:
+  #            only:
+  #              - master
+  #  jobs:
+  #    - spotifybox
